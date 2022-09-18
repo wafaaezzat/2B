@@ -15,8 +15,38 @@ use Mcamara\LaravelLocalization\Facades\LaravelLocalization;
 |
 */
 
-Route::get('/', function () {
-    return view('home');
+//Route::get('/', function () {
+//    return view('home');
+//});
+
+
+
+
+Auth::routes();
+
+Route::group(
+    [
+        'prefix' => LaravelLocalization::setLocale(),
+        'middleware' => ['localeSessionRedirect', 'localizationRedirect', 'localeViewPath']
+    ], function () {
+
+
+    Route::group(['middleware' => ['auth'], 'namespace' => 'Frontend'], function () {
+        Route::get('/', [App\Http\Controllers\Frontend\FrontendController::class, 'index'])->name('home');
+        Route::get('category', [App\Http\Controllers\Frontend\FrontendController::class, 'category'])->name('category');
+        Route::get('view-category/{id}', [App\Http\Controllers\Frontend\FrontendController::class, 'ViewCategory'])->name('view_category');
+        Route::get('view-product/{catId}/{prodId}', [App\Http\Controllers\Frontend\FrontendController::class, 'ViewProduct'])->name('view_product');
+        Route::post('add-to-cart', [App\Http\Controllers\Frontend\CartController::class, 'addProduct']);
+        Route::post('delete-cart-item', [App\Http\Controllers\Frontend\CartController::class, 'deletecartItem']);
+        Route::post('update-cart-items', [App\Http\Controllers\Frontend\CartController::class, 'updateCartItems'])->name('update-cart-items');
+        Route::post('place-order', [App\Http\Controllers\Frontend\CheckOutController::class, 'PlaceOrder'])->name('place-order');
+        Route::get('view-my-order/{id}', [App\Http\Controllers\Frontend\OrderController::class, 'view'])->name('view-my-order');
+        Route::get('product-list', [App\Http\Controllers\Frontend\FrontendController::class, 'productListAjax']);
+
+    });
+
+    Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
+
+    include('admin.php');
+
 });
-
-
